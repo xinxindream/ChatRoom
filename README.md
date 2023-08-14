@@ -1,2 +1,5 @@
 # ChatRoom
-simple online chat room by python
+
+## 一、项目介绍
+
+该项目，源于对于socket通信的学习，用来检验学习成果！
