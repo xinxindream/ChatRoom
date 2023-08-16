@@ -5,6 +5,7 @@
 """
 
 from myServerSocket import myServerSocket
+from mySocketWrapper import mySocketWrapper
 
 class Server(object):
     """
@@ -26,14 +27,16 @@ class Server(object):
         client_socket, client_addr = self.server_socket.accept()
         print("已建立连接~~~")
         
-        # 收发信息
+        # 收发信息，引入封装套接字
+        ## 创建套接字对象
+        my_client_socket = mySocketWrapper(client_socket)
+        
         ## 收，解码
-        recv_data = client_socket.recv(512)
-        print(recv_data.decode("utf-8"))
+        print(my_client_socket.recvData())
 
         ## 发，编码
         msg = "你好！"
-        client_socket.send(msg.encode("utf-8"))
+        my_client_socket.sendData(msg)
 
         client_socket.close()
         self.server_socket.close()
