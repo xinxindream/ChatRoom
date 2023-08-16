@@ -30,3 +30,11 @@ class mySocketWrapper(object):
     """
     def sendData(self, msg):
         self.mysocket.send(msg.encode("utf-8"))
+
+    """
+    @Description: 关闭套接字
+    @Parameters: 
+    @Return: 
+    """
+    def closeSocket(self):
+        self.mysocket.close()
