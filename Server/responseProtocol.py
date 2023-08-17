@@ -15,7 +15,7 @@ class responseProtocol(object):
     |   username: 用户名
     @Return: “响应结果代码|result|nickname|username”
     """
-    def response_login_result(result, nickname, username):
+    def response_login_result(self, result, nickname, username):
         return DELIMITER.join([RESPONSE_LOGIN_RESULT, result, nickname, username])
     
     """
@@ -25,5 +25,5 @@ class responseProtocol(object):
     |   message: 消息正文
     @Return: “响应结果代码|nickname|message”
     """
-    def response_chat(nickname, messages):
+    def response_chat(self, nickname, messages):
         return DELIMITER.join([REQUEST_CHAT, nickname, messages])
