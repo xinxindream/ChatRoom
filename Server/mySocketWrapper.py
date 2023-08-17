@@ -16,12 +16,15 @@ class mySocketWrapper(object):
         self.mysocket = mysocket
 
     """
-    @Description: 接受消息并解码
+    @Description: 接受消息并解码，若用户直接关闭客户端，返回空值，利用try捕捉异常
     @Parameters: 
     @Return: 解码后的信息
     """
     def recvData(self):
-        return self.mysocket.recv(512).decode("utf-8")
+        try:
+            return self.mysocket.recv(512).decode("utf-8")
+        except:
+            return None
     
     """
     @Description: 编码并发送消息
