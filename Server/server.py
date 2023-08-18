@@ -7,6 +7,8 @@
 from myServerSocket import myServerSocket
 from mySocketWrapper import mySocketWrapper
 from threading import Thread
+from config import *
+from responseProtocol import responseProtocol
 
 class Server(object):
     """
@@ -15,15 +17,38 @@ class Server(object):
     @Return: 
     """
     def __init__(self):
+        # 初始化自定义服务器套接字
         self.server_socket = myServerSocket()
+
+        # 请求处理函数对应字典
+        self.requset_function_dict = {
+            REQUEST_LOGIN : self.loginHandler,
+            REQUEST_CHAT : self.chatHandler
+        }
+
+        # 实时在线用户字典
+        self.online_clients = {}
 
     """
     @Description: 解析客户端请求
-    @Parameters: 
-    @Return: 
+    @Parameters: 服务器接受解码后的客户端数据（客户端按照协议格式化过后）
+    @Return: 解析体，字典
     """
     def parseRequest(self, recv_data):
+        """
+        解析规则：
+        1. 登录请求体：0001|username|password
+        2. 聊天请求体：0002|username|message
+        """
         parse_data_list = recv_data.split('|')
+        parse_data_dict = {}
+        parse_data_dict['request_id'] = parse_data_list[0]
+        parse_data_dict['username'] = parse_data_list[1]
+        if parse_data_list[0] == REQUEST_LOGIN:
+            parse_data_dict['password'] = parse_data_list[2]
+        elif parse_data_list[0] == REQUEST_CHAT:
+            parse_data_dict['message'] = parse_data_list[2]
+        return parse_data_dict
 
     """
     @Description: 客户端主动关闭连接
@@ -32,6 +57,45 @@ class Server(object):
     """
     def logOut(self, client_addr):
         print(f"用户{client_addr[0]}:{client_addr[1]}下线")
+
+    """
+    @Description: 登录请求处理
+    @Parameters: 客户端套接字，解析后的数据
+    @Return: 
+    """
+    def loginHandler(self, client_socket, parse_data):
+        print("登录请求收到~")
+        username = parse_data['username']
+        password = parse_data['password']
+
+        # 查询用户是否合法
+        result, nickname, username = self.loginCheck(username, password)
+
+        # 登录成功，保存客户端套接字
+        if result == '1':
+            self.online_clients[username] = {'cilent_socket' : client_socket, 'nickname' : nickname}
+
+        # 连接结果并响应客户端
+        response_login_data = responseProtocol().response_login_result(result, nickname, username)
+
+        # 发送结果给客户端
+        client_socket.sendData(response_login_data)
+
+    """
+    @Description: 调用数据库查询，获取结果
+    @Parameters: 
+    @Return: 
+    """
+    def loginCheck(self, username, password):
+        return '1', 'nick', 'user1'
+
+    """
+    @Description: 
+    @Parameters: 
+    @Return: 
+    """
+    def chatHandler(self, client_socket, parse_data):
+        print("聊天请求收到~")
 
     """
     @Description: 服务器处理客户端请求
@@ -51,9 +115,15 @@ class Server(object):
                 break
 
             print("收到客户端信息：" + recv_data)
-
             ## 解析数据
             parse_data = self.parseRequest(recv_data)
+            print("解析后的数据：%s" % parse_data)
+
+            ## 执行相应功能函数
+            requset_function = self.requset_function_dict.get(parse_data['request_id'])
+            if requset_function:
+                requset_function(my_client_socket, parse_data)
+            
 
             ## 发，编码
             msg = "你好！"
@@ -79,10 +149,6 @@ class Server(object):
             # 引入多线程，实现服务器与多个客户端同时交互
             t = Thread(target=self.requestHandler, args=(my_client_socket, client_addr))
             t.start()
-    
-            # client_socket.close()
-            # self.server_socket.close()
-    
 
 
 if __name__ == "__main__":
