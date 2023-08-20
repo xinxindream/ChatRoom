@@ -131,8 +131,9 @@ class Server(object):
         transmit_msg = responseProtocol().response_chat(nickname, message)
 
         # 转发消息给在线用户（广播）
-        for value in self.online_clients.values():
-            # print(value)
+        for key_username, value in self.online_clients.items():
+            if key_username == username:
+                continue
             value['client_socket'].sendData(transmit_msg)
 
     """
