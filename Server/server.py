@@ -58,9 +58,15 @@ class Server(object):
     @Parameters: 客户端地址
     @Return: 
     """
-    def logOut(self, client_addr):
+    def logOut(self, client_socket, client_addr):
         print(f"用户{client_addr[0]}:{client_addr[1]}下线")
-
+        for key, value in self.online_clients.items():
+            if value['client_socket'] == client_socket:
+                print(self.online_clients)
+                del self.online_clients[key]
+                print(self.online_clients)
+                break
+                
     """
     @Description: 登录请求处理
     @Parameters: 客户端套接字，解析后的数据
@@ -76,7 +82,7 @@ class Server(object):
 
         # 登录成功，保存客户端套接字
         if result == '1':
-            self.online_clients[username] = {'cilent_socket' : client_socket, 'nickname' : nickname}
+            self.online_clients[username] = {'client_socket' : client_socket, 'nickname' : nickname}
 
         # 连接结果并响应客户端
         response_login_data = responseProtocol().response_login_result(result, nickname, username)
@@ -126,7 +132,7 @@ class Server(object):
 
             ## 若客户端发送信息为空，则判断下线，关闭客户端套接字，但保持服务器套接字开启
             if not recv_data:
-                self.logOut(client_addr)
+                self.logOut(my_client_socket, client_addr)
                 my_client_socket.closeSocket()
                 break
 
