@@ -26,4 +26,4 @@ class responseProtocol(object):
     @Return: “响应结果代码|nickname|message”
     """
     def response_chat(self, nickname, messages):
-        return DELIMITER.join([REQUEST_CHAT, nickname, messages])
+        return DELIMITER.join([RESPONSE_CHAT, nickname, messages])
