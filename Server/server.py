@@ -9,6 +9,7 @@ from mySocketWrapper import mySocketWrapper
 from threading import Thread
 from config import *
 from responseProtocol import responseProtocol
+from DB.db import MyDB
 
 class Server(object):
     """
@@ -28,6 +29,9 @@ class Server(object):
 
         # 实时在线用户字典
         self.online_clients = {}
+
+        # 数据库操作对象
+        self.db = MyDB()
 
     """
     @Description: 解析客户端请求
@@ -87,7 +91,20 @@ class Server(object):
     @Return: 
     """
     def loginCheck(self, username, password):
-        return '1', 'nick', 'user1'
+        # 数据库通过用户名查询数据
+        sql = "select * from users where username={}".format(username)
+        query_result = self.db.getItem(sql)
+
+        # case1：用户不存在
+        if not query_result:
+            return '0', '', '' 
+        
+        # case2: 全部正确
+        if query_result['password'] == password:
+            return '1', query_result['nickname'], query_result['username']
+        # case3: 密码不正确
+        else:
+            return '0', '', '' 
 
     """
     @Description: 
