@@ -3,13 +3,12 @@
 @Author: Pan Xiaofei
 @Date: 2023-08-15 20:13:44
 """
-
+from DB.db import MyDB
 from myServerSocket import myServerSocket
 from mySocketWrapper import mySocketWrapper
 from threading import Thread
 from config import *
 from responseProtocol import responseProtocol
-from DB.db import MyDB
 
 class Server(object):
     """
@@ -92,7 +91,7 @@ class Server(object):
     """
     def loginCheck(self, username, password):
         # 数据库通过用户名查询数据
-        sql = "select * from users where username={}".format(username)
+        sql = "select * from users where username= '%s' " % username
         query_result = self.db.getItem(sql)
 
         # case1：用户不存在
