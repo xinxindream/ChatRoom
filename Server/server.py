@@ -26,7 +26,10 @@ class Server(object):
             REQUEST_CHAT : self.chatHandler
         }
 
-        # 实时在线用户字典
+        """
+        实时在线用户字典
+        username : {'client_socket' : client_socket, 'nickname' : nickname}
+        """
         self.online_clients = {}
 
         # 数据库操作对象
@@ -89,6 +92,7 @@ class Server(object):
 
         # 发送结果给客户端
         client_socket.sendData(response_login_data)
+        print(self.online_clients)
 
     """
     @Description: 调用数据库查询，获取结果
@@ -112,12 +116,24 @@ class Server(object):
             return '0', '', '' 
 
     """
-    @Description: 
+    @Description: 处理聊天信息，即广播还是一对一 
     @Parameters: 
     @Return: 
     """
     def chatHandler(self, client_socket, parse_data):
         print("聊天请求收到~")
+        # 获取消息内容
+        username = parse_data['username']
+        message = parse_data['message']
+        nickname = self.online_clients[username]['nickname']
+
+        # 拼接发送给客户端的消息文本
+        transmit_msg = responseProtocol().response_chat(nickname, message)
+
+        # 转发消息给在线用户（广播）
+        for value in self.online_clients.values():
+            # print(value)
+            value['client_socket'].sendData(transmit_msg)
 
     """
     @Description: 服务器处理客户端请求
@@ -147,9 +163,9 @@ class Server(object):
                 requset_function(my_client_socket, parse_data)
             
 
-            ## 发，编码
-            msg = "你好！"
-            my_client_socket.sendData(msg)
+            # ## 发，编码
+            # msg = "你好！"
+            # my_client_socket.sendData(msg)
 
     """
     @Description: 开启服务器
