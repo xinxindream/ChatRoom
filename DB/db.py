@@ -5,7 +5,9 @@
 """
 
 import pymysql
-from properties import *
+
+from DB.properties import *
+
 
 class MyDB(object):
     """
